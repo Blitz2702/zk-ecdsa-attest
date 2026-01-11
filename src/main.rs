@@ -35,7 +35,7 @@ fn main() {
 
     // Verify the Proof
     println!("> Verifying Proof...");
-    let valid = verifier::verifiy_proof(&proof, msg_hash, R, Q);
+    let valid = verifier::verify_proof(&proof, msg_hash, R, Q);
     if valid {
         println!("✅ SUCCESS: Signature verified without revealing 's'!");
     } else {

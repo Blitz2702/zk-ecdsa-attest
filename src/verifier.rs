@@ -6,7 +6,7 @@ use k256::{
 use crate::{prover::Proof, transcript::Transcript};
 
 #[allow(non_snake_case)]
-pub fn verifiy_proof(
+pub fn verify_proof(
     proof: &Proof,
     msg_hash: Scalar,
     R: ProjectivePoint,
