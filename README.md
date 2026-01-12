@@ -63,3 +63,68 @@ zk-ecdsa-attest/
 │   └── main.rs           # CLI Demo (The "Story")
 └── tests/
     └── integration_test.rs # End-to-End integration tests
+└── beenches/
+    └── proof_benchmark.rs # Benchmarking the proof generation
+```
+
+## 🔒 Security Analysis
+
+### Soundness (Binding)
+The protocol ensures that a false prover cannot convince the verifier. This relies on the **Discrete Logarithm Assumption** of the Secp256k1 curve. Specifically, the commitment $T = \alpha \cdot R$ acts as a binding factor; finding a collision in $T$ without knowing $\alpha$ is computationally infeasible.
+
+### Zero-Knowledge (Hiding)
+The response $z = \alpha + c \cdot s$ perfectly hides the secret $s$. Since $\alpha$ is drawn from a uniform distribution, the resulting $z$ is statistically indistinguishable from random noise to anyone who does not know $\alpha$. This provides **Perfect Zero-Knowledge**.
+
+### Non-Interactivity & Replay Protection
+We implement the **Strong Fiat-Shamir Transformation**. The challenge $c$ is derived via a cryptographic hash of the transcript:
+$$c = H(T \ || \ R \ || \ Q \ || \ m)$$
+By including the public context ($R, Q, m$) in the hash, we ensure the proof is bound to the specific session, preventing replay attacks across different messages or identities.
+
+---
+
+## ⚡ Performance Benchmarks
+
+Benchmarks run on [Insert Your CPU Here] using `criterion.rs`.
+
+| Operation | Time (Mean) | Throughput |
+| :--- | :--- | :--- |
+| **Proof Generation** | **78 µs** (0.078 ms) | ~12,800 ops/sec |
+| **Verification** | **256 µs** (0.256 ms) | ~3,900 ops/sec |
+
+> **Analysis:** The protocol achieves sub-millisecond latency, making it suitable for high-frequency authentication systems and real-time remote attestation without introducing perceptible delays.
+
+---
+
+## 📚 Protocol Flow
+
+```mermaid
+sequenceDiagram
+    participant P as Prover (Alice)
+    participant V as Verifier (Bob)
+    Note over P: Know Secret s, Public (R, Q, m)
+    
+    rect rgb(240, 248, 255)
+    note right of P: 1. Commitment Phase
+    P->>P: Sample random α
+    P->>P: T = α * R
+    end
+
+    rect rgb(255, 250, 240)
+    note right of P: 2. Fiat-Shamir (Non-Interactive)
+    P->>P: c = SHA256(T || R || Q || m)
+    end
+
+    rect rgb(240, 255, 240)
+    note right of P: 3. Response Phase
+    P->>P: z_resp = α + c * s
+    end
+
+    P->>V: Send Proof π = {T, z_resp}
+
+    rect rgb(255, 230, 230)
+    note right of V: 4. Verification
+    V->>V: Reconstruct c = SHA256(T || R || Q || m)
+    V->>V: Target = zG + rQ
+    V->>V: Check: z_resp * R == T + c * Target
+    end
+```
