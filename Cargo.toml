@@ -9,3 +9,10 @@ rand = "0.8"
 sha2 = "0.10"
 hex = "0.4"
 thiserror = "1.0" # Optional: Makes error handling pro-level (or just use Strings for now)
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "proof_benchmark"
+harness = false
