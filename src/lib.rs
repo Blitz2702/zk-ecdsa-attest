@@ -29,8 +29,15 @@ pub fn generate_second_generator() -> ProjectivePoint {
         compressed_bytes[0] = 0x02;
         compressed_bytes[1..33].copy_from_slice(&hash_result);
 
-        let encoded_point = EncodedPoint::from_bytes(compressed_bytes);
-        let projective_point = ProjectivePoint::from_encoded_point(&encoded_point.unwrap());
+        let encoded_point = match EncodedPoint::from_bytes(&compressed_bytes) {
+            Ok(pt) => pt,
+            Err(_) => {
+                counter += 1;
+                continue;
+            }
+        };
+
+        let projective_point = ProjectivePoint::from_encoded_point(&encoded_point);
 
         if projective_point.is_some().into() {
             return projective_point.unwrap();
@@ -39,7 +46,7 @@ pub fn generate_second_generator() -> ProjectivePoint {
         counter += 1;
 
         if counter > 1_000_000 {
-            panic!("Could Not Find a Valid Point on Curve");
+            panic!("Critical Error: Failed to find a valid curve point after 1M attempts.");
         }
     }
 }
