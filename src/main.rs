@@ -5,6 +5,7 @@ use k256::{
 use rand::rngs::OsRng;
 use sha2::{Digest, Sha256};
 use zk_ecdsa_attest::{
+    commitments::commit_to_public_key,
     prover::{self, Witness},
     verifier,
 };
@@ -26,16 +27,23 @@ fn main() {
     let k_inv = k.invert().unwrap();
     let s = k_inv * (msg_hash + (r * d));
 
+    // Generate Commitment to Public Key 'Q'
+    let pk_commitment = commit_to_public_key(Q);
+
     // Create a witness
-    let witness = Witness { s, r };
+    let witness = Witness {
+        s,
+        rho: pk_commitment.rho,
+        r,
+    };
 
     // Generate a Proof
     println!("> Generating Proof ...");
-    let proof = prover::generate_proof(&witness, R, Q, msg_hash);
+    let proof = prover::generate_proof(&witness, R, pk_commitment.C, msg_hash);
 
     // Verify the Proof
     println!("> Verifying Proof...");
-    let valid = verifier::verify_proof(&proof, msg_hash, R, Q);
+    let valid = verifier::verify_proof(&proof, msg_hash, R, pk_commitment.C);
     if valid {
         println!("✅ SUCCESS: Signature verified without revealing 's'!");
     } else {

@@ -1,3 +1,5 @@
+use std::sync::OnceLock;
+
 use k256::{
     EncodedPoint, ProjectivePoint, Scalar,
     elliptic_curve::{Field, sec1::FromEncodedPoint},
@@ -5,6 +7,7 @@ use k256::{
 use rand::rngs::OsRng;
 use sha2::{Digest, Sha256};
 
+pub mod commitments;
 pub mod prover;
 pub mod transcript;
 pub mod verifier;
@@ -15,7 +18,16 @@ pub fn generate_keys() -> (Scalar, ProjectivePoint) {
     (sk, pk)
 }
 
-pub fn generate_second_generator() -> ProjectivePoint {
+static H_POINT_STORAGE: OnceLock<ProjectivePoint> = OnceLock::new();
+
+pub fn generate_h_point() -> &'static ProjectivePoint {
+    H_POINT_STORAGE.get_or_init(|| {
+        println!("Initializing Generation of H_Point (using hash_to_curve implementation)");
+        generate_second_generator()
+    })
+}
+
+fn generate_second_generator() -> ProjectivePoint {
     let seed_string = "Pederson_Commitment_H_";
     let mut counter = 0u32;
 
