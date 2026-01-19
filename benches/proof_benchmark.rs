@@ -5,7 +5,7 @@ use k256::{
 };
 use rand::rngs::OsRng;
 use sha2::{Digest, Sha256};
-use zk_ecdsa_attest::{generate_keys, prover, verifier};
+use zk_ecdsa_attest::{commitments::commit_to_public_key, generate_keys, prover, verifier};
 
 #[allow(non_snake_case)]
 fn benchmark_proof_generation(c: &mut Criterion) {
@@ -20,7 +20,14 @@ fn benchmark_proof_generation(c: &mut Criterion) {
     let r = <Scalar as Reduce<U256>>::reduce_bytes(&R.to_affine().x());
     let s = k.invert().unwrap() * (msg_hash + r * d);
 
-    let witness = prover::Witness { s, r };
+    // Commit to Q
+    let pk_commitment = commit_to_public_key(Q);
+
+    let witness = prover::Witness {
+        s,
+        rho: pk_commitment.rho,
+        r,
+    };
 
     // Measure the Proof Generation
     c.bench_function("ZK-ECDSA Prove", |b| {
@@ -46,9 +53,14 @@ fn benchmark_verification(c: &mut Criterion) {
     let R = ProjectivePoint::GENERATOR * k;
     let r = <Scalar as Reduce<U256>>::reduce_bytes(&R.to_affine().x());
     let s = k.invert().unwrap() * (msg_hash + r * d);
-    let witness = prover::Witness { s, r };
+    let pk_commitment = commit_to_public_key(Q);
+    let witness = prover::Witness {
+        s,
+        rho: pk_commitment.rho,
+        r,
+    };
 
-    let proof = prover::generate_proof(&witness, R, Q, msg_hash);
+    let proof = prover::generate_proof(&witness, R, pk_commitment.C, msg_hash);
 
     // Measure Verification
     c.bench_function("ZK-ECDSA Verify", |b| {
