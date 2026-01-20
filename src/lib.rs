@@ -41,7 +41,7 @@ fn generate_second_generator() -> ProjectivePoint {
         compressed_bytes[0] = 0x02;
         compressed_bytes[1..33].copy_from_slice(&hash_result);
 
-        let encoded_point = match EncodedPoint::from_bytes(&compressed_bytes) {
+        let encoded_point = match EncodedPoint::from_bytes(compressed_bytes) {
             Ok(pt) => pt,
             Err(_) => {
                 counter += 1;

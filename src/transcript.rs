@@ -25,7 +25,6 @@ impl Transcript {
 
     pub fn retrive_challenge(&mut self) -> Scalar {
         let res = self.hasher.clone().finalize();
-        let challenge = <Scalar as Reduce<U256>>::reduce_bytes(&res);
-        challenge
+        <Scalar as Reduce<U256>>::reduce_bytes(&res)
     }
 }
