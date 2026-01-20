@@ -124,3 +124,7 @@ While this system achieves Identity Anonymity (Bob sees $C_Q$, not $Q$), it does
 - Limitation: The verification equation requires the nonce point $R$ as a public input.
 - Implication: If Alice reuses the exact same signature $(r, s)$ for multiple proofs, the value $R$ acts as a correlation token.
 - Mitigation: This protocol is best suited for scenarios using fresh signatures per session, or where identity hiding is paramount (e.g., anonymous whistleblowing) even if session linking is possible.
+
+## ⚠️ Disclaimer
+
+This is a research prototype developed for academic demonstration purposes. It has not undergone a professional security audit and should not be used in production systems protecting value.
