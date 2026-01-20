@@ -26,7 +26,6 @@ fn benchmark_proof_generation(c: &mut Criterion) {
     let witness = prover::Witness {
         s,
         rho: pk_commitment.rho,
-        r,
     };
 
     // Measure the Proof Generation
@@ -57,7 +56,6 @@ fn benchmark_verification(c: &mut Criterion) {
     let witness = prover::Witness {
         s,
         rho: pk_commitment.rho,
-        r,
     };
 
     let proof = prover::generate_proof(&witness, R, pk_commitment.C, msg_hash);

@@ -24,7 +24,6 @@ fn test_end_to_end_flow() {
     let witness = prover::Witness {
         s,
         rho: pk_commitment.rho,
-        r,
     };
     let proof = prover::generate_proof(&witness, R, pk_commitment.C, z);
 

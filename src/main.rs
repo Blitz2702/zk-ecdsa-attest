@@ -34,7 +34,6 @@ fn main() {
     let witness = Witness {
         s,
         rho: pk_commitment.rho,
-        r,
     };
 
     // Generate a Proof
